@@ -4,7 +4,7 @@ Unicode Lookup is an open-source, client-side reference for Bedrock creators and
 
 Search by hexadecimal value, decimal value, or one character. The result includes the Unicode name, general category, block, code point, decimal value, and copy-ready escape values. Private Use Area values are included across all three ranges.
 
-The site uses the visual language of Mojang's Ore UI as a design reference. It is an independent project and is not affiliated with or endorsed by Mojang or Microsoft.
+The site uses Katorly's [OreUI React package](https://github.com/katorlys/OreUI), an unofficial component library for the Ore UI design language. This independent project is not affiliated with or endorsed by Mojang or Microsoft. OreUI is licensed under MPL-2.0.
 
 ## Features
 
@@ -64,8 +64,9 @@ Vite builds with relative asset paths, which supports project sites served from 
 
 ## Project structure
 
-- `src/App.tsx` contains the lookup experience and page layout.
-- `src/components/ui.tsx` contains shared buttons, segmented controls, icons, and surfaces.
+- `src/App.tsx` contains the lookup experience and uses OreUI components directly.
+- `src/main.tsx` loads the OreUI stylesheet once.
+- `src/styles.css` contains the responsive page layout and theme token overrides.
 - `src/lib/unicode.ts` parses input and formats copy-ready values.
 - `src/lib/metadata.ts` resolves character metadata from lazy-loaded Unicode segments.
 - `src/data/unicode` contains the generated Unicode 18.0.0 metadata and its license terms.

@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Button, CopyButton, Icon, SegmentedControl, Surface } from "./components/ui";
+import { Button } from "@oreui-web/react/button";
+import { Container } from "@oreui-web/react/container";
+import { Navbar } from "@oreui-web/react/navbar";
+import { Table } from "@oreui-web/react/table";
+import { Textfield } from "@oreui-web/react/textfield";
+import { TabButton, Toggles } from "@oreui-web/react/toggles";
+import { Toast } from "@oreui-web/react/toast";
 import type { InputMode } from "./lib/unicode";
-import { codePointFromUrl, formatCodePoint, formatDecimal, getEscapes, parseLookupInput, toUnicodeCharacter } from "./lib/unicode";
+import {
+  codePointFromUrl,
+  formatCodePoint,
+  formatDecimal,
+  getEscapes,
+  parseLookupInput,
+  toUnicodeCharacter,
+} from "./lib/unicode";
 import type { UnicodeMetadata } from "./lib/metadata";
 import { getUnicodeMetadata } from "./lib/metadata";
 
@@ -11,6 +24,12 @@ const INPUT_OPTIONS = [
   { value: "decimal", label: "Decimal" },
   { value: "character", label: "Character" },
 ] as const;
+
+const QUICK_LOOKUPS = [
+  { label: "U+0041", value: 0x41 },
+  { label: "U+2605", value: 0x2605 },
+  { label: "U+E300", value: 0xe300 },
+];
 
 function readInitialState(): {
   codePoint: number | null;
@@ -56,6 +75,58 @@ function getPlaceholder(mode: InputMode): string {
   return "For example, E300";
 }
 
+function CopyAction({
+  label,
+  value,
+  copiedValue,
+  onCopy,
+  compact = false,
+}: {
+  label: string;
+  value: string;
+  copiedValue: string;
+  onCopy: () => void;
+  compact?: boolean;
+}) {
+  const copied = copiedValue === value;
+  return (
+    <Button
+      color="secondary"
+      className={compact ? "copy-action" : undefined}
+      type="button"
+      aria-label={copied ? label + " copied" : "Copy " + label}
+      onClick={onCopy}
+    >
+      {copied ? "Copied" : "Copy"}
+    </Button>
+  );
+}
+
+function CopyCell({
+  label,
+  value,
+  copiedValue,
+  onCopy,
+}: {
+  label: string;
+  value: string;
+  copiedValue: string;
+  onCopy: () => void;
+}) {
+  return (
+    <div className="table-value">
+      <code title={value}>{value}</code>
+      <CopyAction
+        label={label}
+        value={value}
+        copiedValue={copiedValue}
+        onCopy={onCopy}
+        compact
+      />
+    </div>
+  );
+}
+
 export default function App() {
   const [initial] = useState(readInitialState);
   const [mode, setMode] = useState<InputMode>("hex");
@@ -66,6 +137,7 @@ export default function App() {
   const [metadataError, setMetadataError] = useState("");
   const [loadingMetadata, setLoadingMetadata] = useState(initial.codePoint !== null);
   const [message, setMessage] = useState("");
+  const [messageVariant, setMessageVariant] = useState<"informative" | "warning">("informative");
   const [copiedValue, setCopiedValue] = useState("");
 
   useEffect(() => {
@@ -145,13 +217,25 @@ export default function App() {
     window.history.replaceState({}, "", nextUrl);
   }
 
+  function handleQuickLookup(value: number) {
+    setMode("hex");
+    setQuery(value.toString(16).toUpperCase());
+    setCodePoint(value);
+    setInputError("");
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.set("code", value.toString(16).toUpperCase());
+    window.history.replaceState({}, "", nextUrl);
+  }
+
   async function copyValue(value: string, label: string) {
     try {
       await navigator.clipboard.writeText(value);
       setCopiedValue(value);
+      setMessageVariant("informative");
       setMessage(label + " copied to the clipboard.");
       window.setTimeout(() => setCopiedValue(""), 1600);
     } catch {
+      setMessageVariant("warning");
       setMessage("Clipboard access is not available in this browser.");
     }
   }
@@ -166,267 +250,259 @@ export default function App() {
   const escapes = codePoint === null ? null : getEscapes(codePoint);
   const character = codePoint === null ? "" : toUnicodeCharacter(codePoint);
   const isBusy = loadingMetadata;
+  const metadataRows = codePoint === null
+    ? []
+    : [
+        { label: "Code point", value: formatCodePoint(codePoint), copyLabel: "code point" },
+        { label: "Decimal", value: formatDecimal(codePoint), copyLabel: "decimal value" },
+        {
+          label: "General category",
+          value: metadata
+            ? metadata.category + " (" + metadata.categoryName + ")"
+            : isBusy
+              ? "Loading"
+              : "Unavailable",
+          copyLabel: "general category",
+        },
+        {
+          label: "Unicode block",
+          value: metadata?.block ?? (metadata ? "No Unicode block assigned" : "Loading"),
+          copyLabel: "Unicode block",
+        },
+        { label: "Unicode version", value: metadata?.version ?? "18.0.0", copyLabel: "Unicode version" },
+      ];
 
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main">Skip to lookup</a>
 
-      <header className="site-header">
-        <a className="wordmark" href="./" aria-label="Unicode Lookup home">
-          <span className="wordmark-icon" aria-hidden="true">U+</span>
-          <span>Unicode Lookup</span>
-        </a>
-        <a
-          className="header-link"
-          href="https://wiki.bedrock.dev/text/fonts.html"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Bedrock Wiki fonts
-          <Icon name="arrow" size={15} />
-        </a>
-      </header>
+      <Navbar aria-label="Main navigation" className="site-navbar">
+        <div className="ore-navbar-start">
+          <a className="home-link" href="./" aria-label="Unicode Lookup home">
+            <span className="home-code">U+</span>
+          </a>
+        </div>
+        <span className="ore-navbar-title">Unicode Lookup</span>
+        <div className="ore-navbar-actions">
+          <a
+            className="ore-navbar-action wiki-link"
+            href="https://wiki.bedrock.dev/text/fonts.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Bedrock Wiki fonts
+          </a>
+        </div>
+      </Navbar>
 
       <main id="main" className="main-content">
-        <section className="intro" aria-labelledby="page-title">
-          <div className="intro-copy">
-            <p className="eyebrow"><span className="eyebrow-mark" />Unicode 18.0 reference</p>
-            <h1 id="page-title">Look up any Unicode code point.</h1>
-            <p className="intro-description">
-              Search by hexadecimal value, decimal value, or character. Copy its name,
-              metadata, and escape sequences in one place.
-            </p>
-          </div>
-          <div className="coverage-note" aria-label="Unicode code point coverage">
-            <div className="coverage-heading">
-              <Icon name="spark" size={17} />
-              <span>Across every plane</span>
-            </div>
-            <div className="coverage-values">
-              <span>0000</span>
-              <span className="coverage-line" aria-hidden="true" />
-              <span>10FFFF</span>
-            </div>
-            <p>Private Use Areas included</p>
-          </div>
-        </section>
+        <header className="page-heading">
+          <h1>Find a code point</h1>
+          <p>
+            Search Unicode 18.0.0 by hexadecimal value, decimal value, or character.
+            Every plane is available, including the Private Use Areas.
+          </p>
+        </header>
 
-        <Surface className="search-panel">
-          <div className="search-panel-heading">
-            <div>
-              <h2>Find a character</h2>
-              <p>Enter one value to see its Unicode details.</p>
-            </div>
-            <span className="local-badge"><span />Runs in your browser</span>
-          </div>
+        <Container variant="dark" className="lookup-workspace">
+          <div className="workspace-grid">
+            <section className="lookup-column" aria-labelledby="lookup-heading">
+              <div className="section-heading">
+                <h2 id="lookup-heading">Find a character</h2>
+                <p>Choose a format, then enter a value.</p>
+              </div>
 
-          <form className="lookup-form" onSubmit={handleLookup} noValidate>
-            <SegmentedControl
-              label="Lookup input type"
-              value={mode}
-              options={INPUT_OPTIONS}
-              onChange={handleModeChange}
-            />
-            <label className="field-label" htmlFor="lookup-input">
-              {mode === "hex" ? "Hexadecimal code point" : mode === "decimal" ? "Decimal code point" : "Unicode character"}
-            </label>
-            <div className="lookup-row">
-              <div className="input-wrap">
-                <Icon name={mode === "character" ? "spark" : "search"} size={20} />
-                <input
-                  id="lookup-input"
+              <form className="lookup-form" onSubmit={handleLookup} noValidate>
+                <Toggles aria-label="Lookup input type" className="input-modes">
+                  {INPUT_OPTIONS.map((option) => (
+                    <TabButton
+                      key={option.value}
+                      value={option.value}
+                      selected={mode === option.value}
+                      onChange={() => handleModeChange(option.value)}
+                    >
+                      {option.label}
+                    </TabButton>
+                  ))}
+                </Toggles>
+
+                <Textfield
+                  className="lookup-field"
                   name="lookup"
+                  label={mode === "hex" ? "Hexadecimal code point" : mode === "decimal" ? "Decimal code point" : "Unicode character"}
+                  description={inputError ? "" : "Hex accepts U+ and 0x prefixes. Character mode accepts one code point."}
+                  error={inputError}
                   type="text"
-                  inputMode={mode === "decimal" ? "numeric" : mode === "hex" ? "text" : "text"}
-                  autoComplete="off"
-                  autoCapitalize={mode === "hex" ? "characters" : "off"}
-                  spellCheck={false}
-                  value={query}
+                  inputMode={mode === "decimal" ? "numeric" : "text"}
+                  autocomplete="off"
                   placeholder={getPlaceholder(mode)}
-                  aria-invalid={inputError ? "true" : undefined}
-                  aria-describedby={inputError ? "input-error" : "lookup-hint"}
-                  onChange={(event) => setQuery(event.target.value)}
+                  value={query}
+                  onInput={(event) => {
+                    const field = event.currentTarget as HTMLElement & { value: string };
+                    setQuery(field.value);
+                  }}
                 />
+
+                <Button type="submit" color="primary" className="lookup-submit">
+                  Look up
+                </Button>
+              </form>
+
+              <div className="quick-lookups">
+                <p>Examples</p>
+                <div className="quick-lookup-list">
+                  {QUICK_LOOKUPS.map((item) => (
+                    <Button
+                      key={item.value}
+                      color="secondary"
+                      className="quick-lookup"
+                      type="button"
+                      onClick={() => handleQuickLookup(item.value)}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <Button type="submit" variant="primary" icon="search" className="lookup-button">
-                Look up
-              </Button>
-            </div>
-            {inputError ? (
-              <p className="field-message field-error" id="input-error" role="alert">{inputError}</p>
-            ) : (
-              <p className="field-message" id="lookup-hint">
-                Hex accepts U+ and 0x prefixes. Character mode accepts one code point.
-              </p>
-            )}
-          </form>
+            </section>
 
-          <div className="quick-tries" aria-label="Example code points">
-            <span>Try</span>
-            {[
-              { label: "A", value: 0x41 },
-              { label: "★", value: 0x2605 },
-              { label: "E300", value: 0xe300 },
-            ].map((sample) => (
-              <button
-                className="quick-try"
-                type="button"
-                key={sample.value}
-                onClick={() => {
-                  setMode("hex");
-                  setQuery(sample.value.toString(16).toUpperCase());
-                  setCodePoint(sample.value);
-                  setInputError("");
-                  const nextUrl = new URL(window.location.href);
-                  nextUrl.searchParams.set("code", sample.value.toString(16).toUpperCase());
-                  window.history.replaceState({}, "", nextUrl);
-                }}
-                aria-label={"Look up " + formatCodePoint(sample.value)}
-              >
-                {sample.label}
-              </button>
-            ))}
-          </div>
-        </Surface>
-
-        <section className="result-section" aria-labelledby="result-heading" aria-live="polite">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow eyebrow-light">Character details</p>
-              <h2 id="result-heading">Your lookup</h2>
-            </div>
-            {codePoint !== null ? (
-              <Button variant="quiet" icon="share" onClick={copyShareLink}>
-                Copy share link
-              </Button>
-            ) : null}
-          </div>
-
-          {codePoint === null ? (
-            <div className="empty-state">
-              <div className="empty-mark" aria-hidden="true">?</div>
-              <p>Enter a valid code point to see its details.</p>
-            </div>
-          ) : (
-            <>
-              <Surface className="identity-panel">
-                <div
-                  className="glyph-preview"
-                  role="img"
-                  aria-label={metadata ? "Preview of " + displayName(metadata) : "Unicode glyph preview"}
-                >
-                  {metadata && shouldShowGlyph(metadata) ? character : <span className="glyph-placeholder">Aa</span>}
+            <section
+              className="result-column"
+              aria-labelledby="result-heading"
+              aria-live="polite"
+              aria-busy={isBusy}
+            >
+              <div className="result-heading-row">
+                <div className="section-heading">
+                  <h2 id="result-heading">Character details</h2>
                 </div>
-                <div className="identity-copy">
-                  <p className="identity-kicker">{metadata ? metadata.categoryName : isBusy ? "Loading Unicode metadata" : "Unicode character"}</p>
-                  <h3>{metadata ? displayName(metadata) : isBusy ? "Looking up character" : metadataError || "Character details"}</h3>
-                  <p className="identity-block">
-                    {metadata?.block ?? (metadata ? "No Unicode block assigned" : "Unicode 18.0.0")}
-                  </p>
-                </div>
-                <div className="identity-code">
-                  <span>Code point</span>
-                  <code>{formatCodePoint(codePoint)}</code>
-                  <CopyButton
-                    label="code point"
-                    copied={copiedValue === formatCodePoint(codePoint)}
-                    onClick={() => void copyValue(formatCodePoint(codePoint), "Code point")}
-                  />
-                </div>
-              </Surface>
-
-              {metadata?.isPrivateUse ? (
-                <p className="notice notice-pua">
-                  Private Use Area characters have no standard name or glyph. Their appearance depends on the font or resource pack.
-                </p>
-              ) : metadata?.isUnassigned ? (
-                <p className="notice">
-                  {metadata.name === null && ((codePoint >= 0xfdd0 && codePoint <= 0xfdef) || (codePoint & 0xfffe) === 0xfffe)
-                    ? "Unicode noncharacters are reserved for internal use and are not assigned a standard glyph."
-                    : "Unicode 18.0.0 does not assign a character name to this code point."}
-                </p>
-              ) : null}
-
-              <div className="metadata-grid">
-                <Surface className="metadata-item">
-                  <span className="metadata-label">Decimal</span>
-                  <div className="metadata-value-row">
-                    <code>{formatDecimal(codePoint)}</code>
-                    <CopyButton
-                      label="decimal value"
-                      copied={copiedValue === String(codePoint)}
-                      onClick={() => void copyValue(String(codePoint), "Decimal value")}
-                    />
-                  </div>
-                </Surface>
-                <Surface className="metadata-item">
-                  <span className="metadata-label">General category</span>
-                  <div className="metadata-value-row">
-                    <span>{metadata ? metadata.category + " · " + metadata.categoryName : isBusy ? "Loading" : "Unavailable"}</span>
-                    {metadata ? <CopyButton
-                      label="general category"
-                      copied={copiedValue === metadata.category}
-                      onClick={() => void copyValue(metadata.category, "General category")}
-                    /> : null}
-                  </div>
-                </Surface>
-                <Surface className="metadata-item">
-                  <span className="metadata-label">Unicode version</span>
-                  <div className="metadata-value-row">
-                    <span>{metadata?.version ?? "18.0.0"}</span>
-                  </div>
-                </Surface>
-              </div>
-
-              <Surface className="escape-panel">
-                <div className="escape-heading">
-                  <div>
-                    <h3>Copy-ready values</h3>
-                    <p>Use the escape format your code or document needs.</p>
-                  </div>
-                  <Button
-                    variant="quiet"
-                    icon="copy"
-                    onClick={() => void copyValue(character, "Character")}
-                  >
-                    Copy character
+                {codePoint !== null ? (
+                  <Button color="secondary" type="button" onClick={() => void copyShareLink()}>
+                    Copy share link
                   </Button>
-                </div>
-                {escapes ? (
-                  <div className="escape-grid">
-                    {[
-                      { label: "JavaScript", value: escapes.javascript },
-                      { label: "HTML", value: escapes.html },
-                      { label: "CSS", value: escapes.css },
-                      { label: "UTF-8 bytes", value: escapes.utf8 },
-                    ].map((item) => (
-                      <div className="escape-item" key={item.label}>
-                        <span className="metadata-label">{item.label}</span>
-                        <div className="metadata-value-row">
-                          <code>{item.value}</code>
-                          <CopyButton
-                            label={item.label + " escape"}
-                            copied={copiedValue === item.value}
-                            onClick={() => void copyValue(item.value, item.label)}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 ) : null}
-              </Surface>
-            </>
-          )}
-        </section>
+              </div>
+
+              {codePoint === null ? (
+                <p className="empty-state">
+                  Enter a valid code point to see its Unicode details.
+                </p>
+              ) : (
+                <>
+                  <div className="character-overview">
+                    <Container
+                      variant="light"
+                      className="glyph-preview"
+                      role="img"
+                      aria-label={metadata ? "Preview of " + displayName(metadata) : "Unicode glyph preview"}
+                    >
+                      {metadata && shouldShowGlyph(metadata)
+                        ? <span className="glyph-character">{character}</span>
+                        : <span className="glyph-placeholder">U+</span>}
+                    </Container>
+                    <div className="character-summary">
+                      <p className="character-kind">
+                        {metadata ? metadata.categoryName : isBusy ? "Loading Unicode metadata" : "Unicode character"}
+                      </p>
+                      <h3>{metadata ? displayName(metadata) : isBusy ? "Looking up character" : metadataError || "Character details"}</h3>
+                      <p>{metadata?.block ?? (metadata ? "No Unicode block assigned" : "Unicode 18.0.0")}</p>
+                      <CopyAction
+                        label="character"
+                        value={character}
+                        copiedValue={copiedValue}
+                        onCopy={() => void copyValue(character, "Character")}
+                      />
+                    </div>
+                  </div>
+
+                  {metadata?.isPrivateUse ? (
+                    <p className="character-note" role="note">
+                      Private-use code points have no standard name or glyph. Their appearance depends on the font or resource pack.
+                    </p>
+                  ) : metadata?.isUnassigned ? (
+                    <p className="character-note" role="note">
+                      {metadata.name === null && (
+                        (codePoint >= 0xfdd0 && codePoint <= 0xfdef) ||
+                        (codePoint & 0xfffe) === 0xfffe
+                      )
+                        ? "Unicode noncharacters are reserved for internal use and are not assigned a standard glyph."
+                        : "Unicode 18.0.0 does not assign a character name to this code point."}
+                    </p>
+                  ) : null}
+
+                  <Table variant="striped" className="details-table">
+                    <table>
+                      <caption>Unicode properties and escape sequences</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col" className="ore-table-row-header-column">Property</th>
+                          <th scope="col">Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {metadataRows.map((row) => (
+                          <tr key={row.label}>
+                            <th scope="row">{row.label}</th>
+                            <td>
+                              <CopyCell
+                                label={row.copyLabel}
+                                value={row.value}
+                                copiedValue={copiedValue}
+                                onCopy={() => void copyValue(row.value, row.copyLabel)}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                        {escapes ? (
+                          <>
+                            {[
+                              { label: "JavaScript", copyLabel: "JavaScript escape", value: escapes.javascript },
+                              { label: "HTML", copyLabel: "HTML escape", value: escapes.html },
+                              { label: "CSS", copyLabel: "CSS escape", value: escapes.css },
+                              { label: "UTF-8 bytes", copyLabel: "UTF-8 bytes", value: escapes.utf8 },
+                            ].map((item) => (
+                              <tr key={item.label}>
+                                <th scope="row">{item.label}</th>
+                                <td>
+                                <CopyCell
+                                    label={item.copyLabel}
+                                    value={item.value}
+                                    copiedValue={copiedValue}
+                                    onCopy={() => void copyValue(item.value, item.copyLabel)}
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                          </>
+                        ) : null}
+                      </tbody>
+                    </table>
+                  </Table>
+                </>
+              )}
+            </section>
+          </div>
+        </Container>
       </main>
 
       <footer className="site-footer">
         <p>Unicode 18.0.0 data from the Unicode Consortium.</p>
-        <p>Glyph rendering depends on fonts installed on your device.</p>
+        <p>Glyph rendering depends on fonts installed on your device or resource pack.</p>
+        <p>The lookup is processed in your browser. No code point is sent to an API.</p>
       </footer>
 
-      <div className="visually-hidden" role="status" aria-live="polite">{message}</div>
-      <span className="visually-hidden">The lookup is processed in your browser. No code point is sent to an API.</span>
+      <p className="visually-hidden" role="status" aria-live="polite">{message}</p>
+      <Toast
+        open={Boolean(message)}
+        duration={2400}
+        position="bottom-center"
+        variant={messageVariant}
+        onOpenChange={(event) => {
+          if (!event.detail) setMessage("");
+        }}
+      >
+        {message}
+      </Toast>
     </div>
   );
 }

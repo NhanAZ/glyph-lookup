@@ -4,7 +4,7 @@
 
 - Keep the website static and client-side. Do not add analytics, advertising, API calls, or runtime dependencies that do not serve the lookup flow.
 - Keep Unicode data sourced from the Unicode Character Database. Regenerate checked-in metadata with npm run data:update.
-- Keep the interface responsive and keyboard accessible. Use the shared UI primitives in src/components/ui.tsx when they fit.
+- Keep the interface responsive and keyboard accessible. Use components from @oreui-web/react directly and keep local CSS focused on layout and responsive behavior.
 - Run npm run typecheck, npm test, and npm run build after implementation changes.
 
 ## Writing style

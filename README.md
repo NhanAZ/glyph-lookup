@@ -1,10 +1,14 @@
 # Unicode Lookup
 
-Unicode Lookup is an open-source, client-side reference for Bedrock creators and anyone who needs to identify a Unicode code point. It is designed as a lightweight alternative to the Unicode lookup linked from Bedrock Wiki.
+> NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
 
-Search by hexadecimal value, decimal value, or one character. The result includes the Unicode name, general category, block, code point, decimal value, and copy-ready escape values. Private Use Area values are included across all three ranges.
+Unicode Lookup is a client-side reference for Bedrock creators and anyone who needs to identify a Unicode code point. It is designed as a lightweight alternative to the Unicode lookup linked from Bedrock Wiki.
 
-The site uses Katorly's [OreUI React package](https://github.com/katorlys/OreUI), an unofficial component library for the Ore UI design language. This independent project is not affiliated with or endorsed by Mojang or Microsoft. OreUI is licensed under MPL-2.0.
+Search by hexadecimal value, decimal value, or one character. Results include the Unicode name, general category, block, code point, decimal value, and copy-ready escape values. Private Use Area values are included across all three ranges.
+
+![Unicode Lookup overview](screenshots/unicode-lookup-overview.png)
+
+The site uses Katorly's [OreUI React package](https://github.com/katorlys/OreUI), an unofficial component library for the Ore UI design language. OreUI is licensed under MPL-2.0. This project is independent and is not affiliated with or endorsed by Mojang or Microsoft.
 
 ## Features
 
@@ -23,20 +27,20 @@ Private Use Area characters have no standard name or assigned appearance. Their 
 
 Install Node.js 22.12 or later and Python 3.10 or later. Python is only needed when regenerating the Unicode data.
 
-`sh
+```sh
 npm ci
 npm run dev
-`
+```
 
 The development server prints a local URL. Vite serves the app with its development reload support.
 
 ## Checks and builds
 
-`sh
+```sh
 npm run typecheck
 npm test
 npm run build
-`
+```
 
 The production site is written to `dist`. To inspect that build locally, run `npm run preview`.
 
@@ -46,9 +50,9 @@ The project includes generated metadata from Unicode 18.0.0. It stores character
 
 Regenerate the checked-in metadata with:
 
-`sh
+```sh
 npm run data:update
-`
+```
 
 This downloads the official Unicode Character Database archive and Terms of Use from the Unicode Consortium. It uses Python's standard library and writes the generated assets under `src/data/unicode`.
 
@@ -58,7 +62,7 @@ Unicode data remains subject to the Unicode Consortium's [Terms of Use](https://
 
 The workflow in `.github/workflows/pages.yml` runs type checking, unit tests, and a production build on pull requests and pushes to `main` or `master`. A successful push to either branch deploys the `dist` artifact to GitHub Pages. The workflow also supports a manual run from either branch.
 
-In the repository settings, set Pages to use GitHub Actions if it is not already enabled. The workflow creates and publishes the Pages artifact. The public URL uses the repository's GitHub Pages address and supports a code query such as `?code=E300`.
+In the repository settings, set Pages to use GitHub Actions if it is not already enabled. The public URL uses the repository's GitHub Pages address and supports a code query such as `?code=E300`.
 
 Vite builds with relative asset paths, which supports project sites served from a repository subpath.
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   codePointFromUrl,
   formatCodePoint,
+  formatDecimal,
   getEscapes,
   parseLookupInput,
 } from "./unicode";
@@ -16,6 +17,19 @@ describe("parseLookupInput", () => {
   it("accepts decimal values and pasted supplementary characters", () => {
     expect(parseLookupInput("57344", "decimal")).toEqual({ ok: true, codePoint: 0xe000 });
     expect(parseLookupInput("🧭", "character")).toEqual({ ok: true, codePoint: 0x1f9ed });
+  });
+
+  it("accepts formatted decimal values copied from character details", () => {
+    const decimal = formatDecimal(0x2605);
+
+    expect(decimal).toBe("9,733");
+    expect(parseLookupInput(decimal, "decimal")).toEqual({ ok: true, codePoint: 0x2605 });
+    expect(parseLookupInput("1,114,111", "decimal")).toEqual({ ok: true, codePoint: 0x10ffff });
+  });
+
+  it("rejects decimal values with invalid comma grouping", () => {
+    expect(parseLookupInput("9,73,3", "decimal").ok).toBe(false);
+    expect(parseLookupInput("97,33", "decimal").ok).toBe(false);
   });
 
   it("preserves a literal space in character mode", () => {

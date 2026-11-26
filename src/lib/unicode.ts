@@ -46,14 +46,20 @@ export function parseLookupInput(value: string, mode: InputMode): ParsedCodePoin
   }
 
   if (mode === "decimal") {
-    if (!/^\d+$/.test(trimmed)) {
+    const decimal = /^\d+$/.test(trimmed)
+      ? trimmed
+      : /^\d{1,3}(?:,\d{3})+$/.test(trimmed)
+        ? trimmed.replace(/,/g, "")
+        : null;
+
+    if (decimal === null) {
       return {
         ok: false,
         message: "Enter a whole decimal number.",
       };
     }
 
-    return validateCodePoint(Number(trimmed));
+    return validateCodePoint(Number(decimal));
   }
 
   const hex = trimmed.replace(/^(?:U\+|0x|\\u\{?)/i, "").replace(/\}$/, "");

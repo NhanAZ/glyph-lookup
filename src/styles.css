@@ -1,5 +1,26 @@
+@font-face {
+  font-family: "Minecraft";
+  src: url("./assets/minecraft-vietnamese/MinecraftSeven-Vietnamese-Matched.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Minecraft Ten";
+  src: url("./assets/minecraft-vietnamese/MinecraftTen-Vietnamese.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
+  --ore-font-body: "Minecraft", "Noto Sans", "GNU Unifont", sans-serif;
+  --ore-font-display: "Minecraft Ten", "Minecraft", "Noto Sans", sans-serif;
+  --ore-font-size-body: 1rem;
+  --ore-line-height-body: 1.25;
   font-family: var(--ore-font-body);
+  font-size: var(--ore-font-size-body);
   color: var(--ore-color-foreground);
   background: var(--ore-color-neutral-surface-deep);
   color-scheme: dark;
@@ -66,71 +87,17 @@ a {
   transform: translateY(0);
 }
 
-.site-navbar {
-  width: 100%;
-  --ore-navbar-background: var(--ore-color-neutral-surface-deep);
-  --ore-navbar-bottom-shadow: var(--ore-color-neutral-border);
-  --ore-navbar-foreground: var(--ore-color-foreground);
-  --ore-navbar-action-background: var(--ore-color-neutral-background);
-  --ore-navbar-action-highlight: var(--ore-color-neutral-specular);
-  --ore-navbar-action-shadow: var(--ore-color-neutral-bevel-shadow);
-}
-
-.home-link {
-  display: inline-flex;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  color: var(--ore-color-green-10);
-  text-decoration: none;
-}
-
-.home-code {
-  font-family: var(--ore-font-display);
-  font-size: 1.25rem;
-}
-
-.home-link:focus-visible,
-.wiki-link:focus-visible,
 .skip-link:focus-visible {
   outline: 2px solid var(--ore-color-focus-ring);
   outline-offset: 3px;
 }
 
-.wiki-link {
-  text-decoration: none;
-}
-
 .main-content {
   width: min(1280px, calc(100% - 64px));
   margin: 0 auto;
-  padding-block: clamp(2rem, 6vh, 4rem);
+  padding-block: 1.25rem;
 }
 
-.page-heading {
-  max-width: 48rem;
-  margin-block-end: 1.75rem;
-}
-
-.page-heading h1 {
-  margin: 0;
-  color: var(--ore-color-foreground);
-  font-family: var(--ore-font-display);
-  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-  font-weight: 400;
-  line-height: 1.15;
-}
-
-.page-heading p {
-  max-width: 44rem;
-  margin: 0.75rem 0 0;
-  color: var(--ore-color-neutral-text-dim);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.page-heading p,
 .section-heading p,
 .quick-lookups p,
 .character-kind,
@@ -199,6 +166,7 @@ a {
 .input-modes ore-tab-button {
   flex: 1 1 0;
   min-width: 0;
+  padding-inline: calc(var(--ore-button-unit) * 10);
 }
 
 .lookup-field {
@@ -254,7 +222,6 @@ a {
   align-items: center;
   gap: 1.25rem;
   padding-block: 0.25rem 1.25rem;
-  border-block-end: 2px solid var(--ore-color-neutral-divider);
 }
 
 .glyph-preview {
@@ -315,7 +282,7 @@ a {
 }
 
 .character-note {
-  margin: 1rem 0 0;
+  margin: 1rem 0;
   padding-inline-start: 0.75rem;
   border-inline-start: 2px solid var(--ore-color-yellow-20);
   color: var(--ore-color-neutral-text-dim);
@@ -386,14 +353,35 @@ a {
   width: min(1280px, calc(100% - 64px));
   margin: auto auto 0;
   padding-block: 1.25rem 1.75rem;
-  border-block-start: 2px solid var(--ore-color-neutral-border);
   color: var(--ore-color-neutral-text-dimmer);
   font-size: 0.75rem;
   line-height: 1.5;
 }
 
+.footer-divider {
+  margin-block: 0 1rem;
+}
+
+.overview-divider {
+  margin-block-start: 0;
+}
+
 .site-footer p {
   margin: 0.25rem 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-start: 0.75rem;
+}
+
+.footer-links > ore-button {
+  --ore-button-unit: 1.25px;
+  --ore-button-font-size: 0.75rem;
+  min-width: 0;
 }
 
 .visually-hidden {
@@ -410,6 +398,10 @@ a {
 
 @media (max-width: 900px) {
   .main-content {
+    width: min(720px, calc(100% - 40px));
+  }
+
+  .site-footer {
     width: min(720px, calc(100% - 40px));
   }
 
@@ -433,23 +425,12 @@ a {
 @media (max-width: 520px) {
   .main-content {
     width: calc(100% - 28px);
-    padding-block: 1.75rem 2.5rem;
-  }
-
-  .site-navbar {
-    --ore-navbar-unit: 1.5px;
+    padding-block: 1rem 1.5rem;
   }
 
   .site-footer {
     width: calc(100% - 28px);
-  }
-
-  .page-heading {
-    margin-block-end: 1.25rem;
-  }
-
-  .page-heading p {
-    font-size: 0.875rem;
+    padding-block: 1rem 1.5rem;
   }
 
   .lookup-workspace {
@@ -467,7 +448,7 @@ a {
   }
 
   .input-modes ore-tab-button {
-    padding-inline: calc(var(--ore-button-unit) * 2);
+    padding-inline: calc(var(--ore-button-unit) * 3);
   }
 
   .lookup-form > * {
@@ -479,10 +460,13 @@ a {
   }
 
   .result-heading-row {
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
   }
 
   .result-heading-row > ore-button {
+    align-self: flex-end;
     --ore-button-unit: 1.25px;
   }
 

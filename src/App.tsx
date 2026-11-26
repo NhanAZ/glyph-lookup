@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "@oreui-web/react/button";
 import { Container } from "@oreui-web/react/container";
-import { Navbar } from "@oreui-web/react/navbar";
+import { Divider } from "@oreui-web/react/divider";
 import { Table } from "@oreui-web/react/table";
 import { Textfield } from "@oreui-web/react/textfield";
 import { TabButton, Toggles } from "@oreui-web/react/toggles";
@@ -276,33 +276,8 @@ export default function App() {
     <div className="app-shell">
       <a className="skip-link" href="#main">Skip to lookup</a>
 
-      <Navbar aria-label="Main navigation" className="site-navbar">
-        <div className="ore-navbar-start">
-          <a className="home-link" href="./" aria-label="Unicode Lookup home">
-            <span className="home-code">U+</span>
-          </a>
-        </div>
-        <span className="ore-navbar-title">Unicode Lookup</span>
-        <div className="ore-navbar-actions">
-          <a
-            className="ore-navbar-action wiki-link"
-            href="https://wiki.bedrock.dev/text/fonts.html"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Bedrock Wiki fonts
-          </a>
-        </div>
-      </Navbar>
-
       <main id="main" className="main-content">
-        <header className="page-heading">
-          <h1>Find a code point</h1>
-          <p>
-            Search Unicode 18.0.0 by hexadecimal value, decimal value, or character.
-            Every plane is available, including the Private Use Areas.
-          </p>
-        </header>
+        <h1 className="visually-hidden">Unicode Lookup</h1>
 
         <Container variant="dark" className="lookup-workspace">
           <div className="workspace-grid">
@@ -330,7 +305,7 @@ export default function App() {
                   className="lookup-field"
                   name="lookup"
                   label={mode === "hex" ? "Hexadecimal code point" : mode === "decimal" ? "Decimal code point" : "Unicode character"}
-                  description={inputError ? "" : "Hex accepts U+ and 0x prefixes. Character mode accepts one code point."}
+                  description={inputError ? "" : "Hex accepts U+ or 0x. Character mode accepts one code point."}
                   error={inputError}
                   type="text"
                   inputMode={mode === "decimal" ? "numeric" : "text"}
@@ -364,6 +339,7 @@ export default function App() {
                   ))}
                 </div>
               </div>
+
             </section>
 
             <section
@@ -430,6 +406,7 @@ export default function App() {
                     </p>
                   ) : null}
 
+                  <Divider className="overview-divider" />
                   <Table variant="striped" className="details-table">
                     <table>
                       <caption>Unicode properties and escape sequences</caption>
@@ -486,9 +463,25 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
+        <Divider className="footer-divider" />
         <p>Unicode 18.0.0 data from the Unicode Consortium.</p>
         <p>Glyph rendering depends on fonts installed on your device or resource pack.</p>
         <p>The lookup is processed in your browser. No code point is sent to an API.</p>
+        <p>This is not an official Minecraft product and is not approved by or associated with Mojang or Microsoft.</p>
+        <nav className="footer-links" aria-label="Project resources">
+          <Button href="https://github.com/NhanAZ/glyph-lookup" color="secondary" target="_blank" rel="noreferrer">
+            GitHub repository
+          </Button>
+          <Button href="https://discord.com/invite/j2X83ujT6c" color="secondary" target="_blank" rel="noreferrer">
+            Discord community
+          </Button>
+          <Button href="https://wiki.bedrock.dev/text/fonts.html" color="secondary" target="_blank" rel="noreferrer">
+            Bedrock Wiki font guide
+          </Button>
+          <Button href="https://wiki.bedrock.dev/text/custom-emojis" color="secondary" target="_blank" rel="noreferrer">
+            Custom emoji guide
+          </Button>
+        </nav>
       </footer>
 
       <p className="visually-hidden" role="status" aria-live="polite">{message}</p>

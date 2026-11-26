@@ -45,6 +45,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  overflow: hidden;
   color: var(--ore-color-foreground);
   background: var(--ore-color-neutral-surface-deep);
 }
@@ -67,9 +68,16 @@ a {
 
 .app-shell {
   display: flex;
-  min-height: 100vh;
+  min-height: 100%;
   flex-direction: column;
   background: var(--ore-color-neutral-surface-deep);
+}
+
+.page-scrollbar {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  scroll-behavior: smooth;
 }
 
 .skip-link {

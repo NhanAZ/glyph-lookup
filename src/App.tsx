@@ -266,7 +266,7 @@ export default function App() {
         },
         {
           label: "Unicode block",
-          value: metadata?.block ?? (metadata ? "No Unicode block assigned" : "Loading"),
+          value: metadata?.block ?? (metadata ? "No Unicode block assigned" : isBusy ? "Loading" : "Unavailable"),
           copyLabel: "Unicode block",
         },
         { label: "Unicode version", value: metadata?.version ?? "18.0.0", copyLabel: "Unicode version" },
@@ -370,18 +370,35 @@ export default function App() {
                       variant="light"
                       className="glyph-preview"
                       role="img"
-                      aria-label={metadata ? "Preview of " + displayName(metadata) : "Unicode glyph preview"}
+                      aria-label={metadata
+                        ? "Preview of " + displayName(metadata)
+                        : isBusy ? "Loading Unicode glyph preview" : "Unicode glyph preview"}
                     >
-                      {metadata && shouldShowGlyph(metadata)
-                        ? <span className="glyph-character">{character}</span>
-                        : <span className="glyph-placeholder">U+</span>}
+                      {isBusy ? (
+                        <span className="loading-skeleton loading-skeleton-glyph" aria-hidden="true" />
+                      ) : metadata && shouldShowGlyph(metadata) ? (
+                        <span className="glyph-character">{character}</span>
+                      ) : (
+                        <span className="glyph-placeholder">U+</span>
+                      )}
                     </Container>
                     <div className="character-summary">
                       <p className="character-kind">
-                        {metadata ? metadata.categoryName : isBusy ? "Loading Unicode metadata" : "Unicode character"}
+                        {isBusy
+                          ? <span className="loading-skeleton loading-skeleton-kind" aria-hidden="true" />
+                          : metadata ? metadata.categoryName : "Unicode character"}
                       </p>
-                      <h3>{metadata ? displayName(metadata) : isBusy ? "Looking up character" : metadataError || "Character details"}</h3>
-                      <p>{metadata?.block ?? (metadata ? "No Unicode block assigned" : "Unicode 18.0.0")}</p>
+                      <h3>{isBusy ? (
+                        <>
+                          <span className="visually-hidden">Loading character details</span>
+                          <span className="loading-skeleton loading-skeleton-title" aria-hidden="true" />
+                        </>
+                      ) : metadata ? displayName(metadata) : metadataError || "Character details"}</h3>
+                      <p>
+                        {isBusy
+                          ? <span className="loading-skeleton loading-skeleton-block" aria-hidden="true" />
+                          : metadata?.block ?? (metadata ? "No Unicode block assigned" : "Unicode 18.0.0")}
+                      </p>
                       <CopyAction
                         label="character"
                         value={character}
@@ -421,12 +438,16 @@ export default function App() {
                           <tr key={row.label}>
                             <th scope="row">{row.label}</th>
                             <td>
-                              <CopyCell
-                                label={row.copyLabel}
-                                value={row.value}
-                                copiedValue={copiedValue}
-                                onCopy={() => void copyValue(row.value, row.copyLabel)}
-                              />
+                              {isBusy && !metadata && (row.label === "General category" || row.label === "Unicode block") ? (
+                                <span className="loading-skeleton loading-skeleton-value" aria-hidden="true" />
+                              ) : (
+                                <CopyCell
+                                  label={row.copyLabel}
+                                  value={row.value}
+                                  copiedValue={copiedValue}
+                                  onCopy={() => void copyValue(row.value, row.copyLabel)}
+                                />
+                              )}
                             </td>
                           </tr>
                         ))}

@@ -1,6 +1,6 @@
 # Unicode Lookup
 
-Unicode Lookup is a client-side reference for Bedrock creators and anyone who needs to identify a Unicode code point.
+Unicode Lookup is a reference for Bedrock creators and anyone who needs to identify a Unicode code point.
 
 Search by hexadecimal value, decimal value, or one character. Results include the Unicode name, general category, block, code point, decimal value, and copy-ready escape values. Private Use Area values are included across all three ranges.
 
@@ -14,7 +14,6 @@ The site uses Katorly's [OreUI React package](https://github.com/katorlys/OreUI)
 - Look up supplementary characters, unassigned code points, noncharacters, and Private Use Area values.
 - Copy the character, code point, decimal value, general category, JavaScript escape, HTML reference, CSS escape, or UTF-8 bytes.
 - Share a lookup with a URL such as `?code=E300`.
-- Load character metadata from local static assets. The site sends no lookup data to an API.
 - Use the interface on desktop, tablet, and mobile with keyboard navigation and visible focus.
 
 Surrogate code points cannot be represented as Unicode characters, so the lookup rejects U+D800 through U+DFFF. Character mode accepts one code point at a time. A multi-code-point sequence, such as a joined emoji, can be looked up one code point at a time.

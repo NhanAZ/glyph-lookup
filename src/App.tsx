@@ -466,7 +466,6 @@ export default function App() {
         <Divider className="footer-divider" />
         <p>Unicode 18.0.0 data from the Unicode Consortium.</p>
         <p>Glyph rendering depends on fonts installed on your device or resource pack.</p>
-        <p>The lookup is processed in your browser. No code point is sent to an API.</p>
         <nav className="footer-links" aria-label="Project resources">
           <Button href="https://github.com/NhanAZ/glyph-lookup" color="secondary" target="_blank" rel="noreferrer">
             GitHub repository

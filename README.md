@@ -1,8 +1,6 @@
 # Unicode Lookup
 
-> NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.
-
-Unicode Lookup is a client-side reference for Bedrock creators and anyone who needs to identify a Unicode code point. It is designed as a lightweight alternative to the Unicode lookup linked from Bedrock Wiki.
+Unicode Lookup is a client-side reference for Bedrock creators and anyone who needs to identify a Unicode code point.
 
 Search by hexadecimal value, decimal value, or one character. Results include the Unicode name, general category, block, code point, decimal value, and copy-ready escape values. Private Use Area values are included across all three ranges.
 
@@ -80,3 +78,5 @@ Vite builds with relative asset paths, which supports project sites served from 
 ## License
 
 The website source is available under the MIT License. Unicode data files remain subject to the Unicode Consortium's Terms of Use.
+
+NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.

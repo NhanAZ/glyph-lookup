@@ -485,8 +485,6 @@ export default function App() {
 
       <footer className="site-footer">
         <Divider className="footer-divider" />
-        <p>Unicode 18.0.0 data from the Unicode Consortium.</p>
-        <p>Glyph rendering depends on fonts installed on your device or resource pack.</p>
         <nav className="footer-links" aria-label="Project resources">
           <Button href="https://github.com/NhanAZ/glyph-lookup" color="secondary" target="_blank" rel="noreferrer">
             GitHub repository
@@ -501,7 +499,6 @@ export default function App() {
             Custom emoji guide
           </Button>
         </nav>
-        <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
       </footer>
 
       <p className="visually-hidden" role="status" aria-live="polite">{message}</p>
